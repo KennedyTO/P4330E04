@@ -1,0 +1,147 @@
+---
+title: "Exercise04"
+author: "Ken Suzuki"
+date: "2023-10-29"
+output: html_document
+---
+
+#### Tasks
+
+##### A researcher was interested in determining if the weight of a vehicle (wt) mediates the relationship between the horsepower (hp) and the miles per gallon (mpg). In other words, is the relationship between hp and mpg partially controlled by wt.
+
+##### Run the above mediation analyses using the 'mtcars' dataset within R, including:
+
+1.  a statistical test of the indirect effect using the percentile bootstrap method (100 bootstrap samples)
+
+2.  an interpretation of the meaning of the unstandardized indirect effect
+
+3.  both the proportion mediated and upsilon (completely standardized indirect effect) effect size measures for the mediation
+
+4.  a plot of the raw hp -\> mpg relationship, as well as a plot of the hp -\> mpg relationship, after controlling for wt.
+
+------------------------------------------------------------------------
+
+#### Load libraries
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(flexplot)
+library(MBESS)
+library(dplyr)
+library(mice)
+library(tidyverse)
+library(GGally)
+library(mediation)
+```
+
+------------------------------------------------------------------------
+
+#### Check the relationship of the three variables + missingness in the dataset.
+
+```{r}
+# Load mtcars dataset
+d <- mtcars
+str(d)
+
+# Check the relationships
+d %>%
+  dplyr::select(hp,wt,mpg) %>% 
+  GGally::ggpairs()
+
+# Check if the data has missing data points
+md.pattern(d)
+```
+
+#### To Fit a Mediation Model (to see if it supports the hypothesis [hp (x) → wt (m) → mpg (y)])
+
+```{r}
+med_model <- lm(wt ~ hp, data = d)
+tot_model <- lm(mpg ~ hp + wt, data = d)
+res <- mediate(model.m = med_model,
+               model.y = tot_model,
+               treat = 'hp',
+               mediator = 'wt',
+               boot = TRUE, sims = 100)
+summary(res)
+
+```
+
+##### ACME = Average Casual Mediation Effects = INDIRECT EFFECT
+
+*This is the X → Y mediated by M*
+
+##### ADE = Average Direct Effect (M is HELD CONSTANT) = DIRECT EFFECT
+
+*This is the effect of the independent variable on the dependent variable that does not occur through the mediator. It quantifies the direct relationship between the independent variable and the dependent variable, bypassing the mediator.*
+
+##### Total Effect = Combined Influence
+
+*It is essentially the total relationship between the independent variable and the dependent variable, **WITHOUT M.** Total Effect is the sum of the Average Direct Effect (ADE) and the Average Causal Mediation Effects (ACME).*
+
+##### Prop. Mediated = Proportion Mediated
+
+*It quantifies the fraction of the Total Effect that is due to the mediator. It quantifies the fraction of the Total Effect that is due to the mediator, or in other words, the portion of the Total Effect that is explained by the mediation process. It is calculated by dividing the Average Causal Mediation Effects (ACME) by the Total Effect.*
+
+*This measure helps in understanding the relative importance or contribution of the mediator in explaining the relationship between the independent variable and the dependent variable. If the proportion is closer to 1, it suggests that a large part of the total effect operates through the mediator, while a proportion closer to 0 suggests that the mediator plays a minor role.*
+
+------------------------------------------------------------------------
+
+#### Interpretation of the results:
+
+##### ACME
+
+Estimate = -0.0365 means that the impact of Horse Power (X) to Mile Per Gallon (Y) through Wight (M) is [*estimated, on average*]{.underline} - 0.0365 mpg, meaning one unit increase of HP (X) through the Wt (M) results in [*an estimated reduction*]{.underline} of 0.0365 mpg (Y) on average.
+
+*Confidence Interval, -0.0614 and -0.02, for this estimate does not include zero, suggesting that this Indirect Effect is statistically significant as supported by the corresponding p-value. [Important to include in your report]*
+
+##### ADE
+
+An ADE of -0.0318 means that for every one-unit increase in HP (X), there is an estimated average decrease of 0.0318 units in mpg (Y), while accounting for (controlled for / holding constant) the mediator. This is a direct relationship between X and Y without considering the mediation effect of M.
+
+*Additionally, the 95% confidence interval for this estimate ranges from -0.0470 to -0.02. Given that the confidence interval does not contain zero, it suggests that this direct effect is statistically significant. The p-value (\<2e-16) marked with '\*\*\*' further indicates strong statistical significance. [Important to include in your report]*
+
+##### Prop. Mediated: Proportion Mediated
+
+An Estimate value of 0.5343 for the Proportion Mediated means that 53% of X and Y relationship is mediated by the Wight (M) of the vehicle.
+
+The CI does not include zero, therefore, it is significantly significant, as supported by the corresponding p-value of less than 2e-16.
+
+------------------------------------------------------------------------
+
+#### To Obtain Completely Standardized Indirect Effect (Upsilon)
+
+```{r}
+# Completely Standardized Indirect Effect
+upsilon(x = d$hp,
+        mediator = d$wt,
+        dv = d$mpg, B = 50)
+
+```
+
+------------------------------------------------------------------------
+
+##### Interpretation:
+
+##### **Upsilon Estimate**: It is Standardized so that it can be compared to other items.
+
+The estimated completely standardized indirect effect is 0.1719908. This suggests that for every standard deviation increase in horse power, there is an estimated increase of 0.1719908 standard deviations in miles per gallon, mediated by the effect of horse power on vehicle weight.
+
+##### 95% CI (LCL = Lower Confidence Limit \| UCL = Upper Confidence Limit)
+
+for this indirect effect ranges from 0.04787505 to 0.4524936. Since the confidence interval does not include zero, this suggests that the mediation effect is statistically significant at the 0.05 level.
+
+In simpler terms, there is evidence to believe that the influence of horse power on miles per gallon is significantly mediated by vehicle weight.
+
+##### **Adjusted Upsilon**:
+
+The adjusted Upsilon is slightly lower at 0.1609993, with a 95% CI ranging from 0.04013726 to 0.4362767. The adjustment may account for potential confounders or other factors in the model. Again, the confidence interval does not contain zero, indicating statistical significance of this adjusted mediation effect.
+
+------------------------------------------------------------------------
+
+#### To Plot Mediation and Compared with Controlling for Wight
+
+```{r}
+# Plot
+added.plot(mpg ~ hp + wt, data = d, method = "lm") # The wight is controlled for
+mediate_plot(mpg ~ hp + wt, data = d) # This is the mediation model compared to the added plot
+```
