@@ -7,7 +7,7 @@ output: html_document
 
 #### Tasks
 
-##### A researcher was interested in determining if the weight of a vehicle (wt) mediates the relationship between the horsepower (hp) and the miles per gallon (mpg). In other words, is the relationship between hp and mpg partially controlled by wt.
+##### A researcher was interested in determining if the weight of a vehicle (wt) mediates the relationship between the horsepower (hp) and the miles per gallon (mpg). In other words, is the relationship between hp and mpg partially controlled by wt. *Use α = .05 for all questions.*
 
 ##### Run the above mediation analyses using the 'mtcars' dataset within R, including:
 
@@ -66,7 +66,7 @@ summary(res)
 
 ```
 
-##### ACME = Average Casual Mediation Effects = INDIRECT EFFECT
+##### ACME = Average Causal Mediation Effects = INDIRECT EFFECT
 
 *This is the X → Y mediated by M*
 
@@ -76,7 +76,7 @@ summary(res)
 
 ##### Total Effect = Combined Influence
 
-*It is essentially the total relationship between the independent variable and the dependent variable, **WITHOUT M.** Total Effect is the sum of the Average Direct Effect (ADE) and the Average Causal Mediation Effects (ACME).*
+*It is essentially the total relationship between the independent variable and the dependent variable, **WITHOUT M**. Total Effect is the sum of the Average Direct Effect (ADE) and the Average Causal Mediation Effects (ACME).*
 
 ##### Prop. Mediated = Proportion Mediated
 
@@ -88,17 +88,19 @@ summary(res)
 
 #### Interpretation of the results:
 
-##### ACME
+##### ACME = Average Casual Mediation Effects = INDIRECT EFFECT
 
 Estimate = -0.0365 means that the impact of Horse Power (X) to Mile Per Gallon (Y) through Wight (M) is [*estimated, on average*]{.underline} - 0.0365 mpg, meaning one unit increase of HP (X) through the Wt (M) results in [*an estimated reduction*]{.underline} of 0.0365 mpg (Y) on average.
 
 *Confidence Interval, -0.0614 and -0.02, for this estimate does not include zero, suggesting that this Indirect Effect is statistically significant as supported by the corresponding p-value. [Important to include in your report]*
 
-##### ADE
+##### ADE = Average Direct Effect (M is HELD CONSTANT) = DIRECT EFFECT
 
-An ADE of -0.0318 means that for every one-unit increase in HP (X), there is an estimated average decrease of 0.0318 units in mpg (Y), while accounting for (controlled for / holding constant) the mediator. This is a direct relationship between X and Y without considering the mediation effect of M.
+*An ADE of -0.0318 means that for every one-unit increase in HP (X), there is an estimated average decrease of 0.0318 units in mpg (Y), while accounting for (controlled for / holding constant) the mediator. This is a direct relationship between X and Y without considering the mediation effect of M.*
 
 *Additionally, the 95% confidence interval for this estimate ranges from -0.0470 to -0.02. Given that the confidence interval does not contain zero, it suggests that this direct effect is statistically significant. The p-value (\<2e-16) marked with '\*\*\*' further indicates strong statistical significance. [Important to include in your report]*
+
+##### Total Effect = Combined Influence
 
 ##### Prop. Mediated: Proportion Mediated
 
@@ -115,7 +117,6 @@ The CI does not include zero, therefore, it is significantly significant, as sup
 upsilon(x = d$hp,
         mediator = d$wt,
         dv = d$mpg, B = 50)
-
 ```
 
 ------------------------------------------------------------------------
@@ -124,7 +125,7 @@ upsilon(x = d$hp,
 
 ##### **Upsilon Estimate**: It is Standardized so that it can be compared to other items.
 
-The estimated completely standardized indirect effect is 0.1719908. This suggests that for every standard deviation increase in horse power, there is an estimated increase of 0.1719908 standard deviations in miles per gallon, mediated by the effect of horse power on vehicle weight.
+The estimated completely standardized indirect effect is 0.1719908. This suggests that for every standard deviation increase in horse power, there is an estimated decrease of 0.1719908 standard deviations in miles per gallon, mediated by the effect of horse power on vehicle weight.
 
 ##### 95% CI (LCL = Lower Confidence Limit \| UCL = Upper Confidence Limit)
 
